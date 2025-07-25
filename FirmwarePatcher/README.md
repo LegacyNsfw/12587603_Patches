@@ -1,3 +1,9 @@
+# This whole thing was vibe-coded
+
+I don't trust it yet, and you shouldn't either.
+
+But it's getting there, which is kind of amazing.
+
 # Firmware Patcher
 
 A C# tool for applying assembly patches to binary firmware images using label-based metadata extraction.
@@ -7,9 +13,15 @@ A C# tool for applying assembly patches to binary firmware images using label-ba
 - **Automatic patch detection** using `PATCH_*_START` and `PATCH_*_END` labels
 - **M68K CPU32 support** via GNU toolchain integration  
 - **Label-based metadata** - no manual size calculations needed
-- **Automatic firmware extension** for patches beyond original size
 - **Patch verification** and detailed reporting
 - **Backup creation** for safety
+
+## Features That Were Removed
+
+Claude thought these were good ideas. This is why vibe coding is equally horrifying and fascinating:
+
+- **Automatic firmware extension** for patches larger than the original firmware
+- **Heuristics** - if required data was missing or invalid, it would just choose a number and keep going
 
 ## Prerequisites
 
