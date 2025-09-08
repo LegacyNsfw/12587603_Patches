@@ -1,0 +1,1 @@
+dotnet run --no-restore -- --selftest

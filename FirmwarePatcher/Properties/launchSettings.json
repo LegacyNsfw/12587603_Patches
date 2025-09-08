@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "FirmwarePatcher": {
+      "commandName": "Project",
+      "commandLineArgs": "--selftest",
+      "workingDirectory": "C:\\GitHub\\12587603_Patches\\FirmwarePatcher"
+    }
+  }
+}
