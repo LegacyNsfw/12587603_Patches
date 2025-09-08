@@ -66,8 +66,9 @@ class Program
             var sectionExtractor = new SectionExtractor(Log.Logger);
             var patchApplicator = new PatchApplicator(Log.Logger);
             var validationService = new ValidationService(Log.Logger);
+            var checksumService = new ChecksumService(Log.Logger);
 
-            // Step 1: Validate inputs
+            // Validate inputs
             Log.Information("=== Validation Phase ===");
             
             if (!validationService.ValidateToolchain(options.ToolchainPath))
@@ -82,12 +83,12 @@ class Program
                 return 1;
             }
 
-            // Step 2: Assemble and link source file
+            // Assemble and link source file
             Log.Information("=== Assembly Phase ===");
             
             var elfFile = await assemblerService.AssembleAsync(options.SourceFile);
 
-            // Step 3: Extract symbol table and identify patches
+            // Extract symbol table and identify patches
             Log.Information("=== Analysis Phase ===");
             
             var symbols = await assemblerService.GetSymbolTableAsync(elfFile);
@@ -100,7 +101,7 @@ class Program
                 return 1;
             }
 
-            // Step 4: Extract binary data for each patch
+            // Extract binary data for each patch
             Log.Information("=== Data Extraction Phase ===");
             
             var sectionDumps = await assemblerService.GetSectionDumpAsync(elfFile);
@@ -138,14 +139,14 @@ class Program
                 Log.Information("  {Patch}", patch);
             }
 
-            // Step 5: Validate firmware and patches
+            // Validate firmware and patches
             if (!validationService.ValidateFirmware(options.FirmwareFile, patches))
             {
                 Log.Error("Firmware validation failed");
                 return 1;
             }
 
-            // Step 6: Apply patches to firmware
+            // Apply patches to firmware
             Log.Information("=== Patch Application Phase ===");
             
             var success = await patchApplicator.ApplyPatchesAsync(
@@ -157,7 +158,21 @@ class Program
                 return 1;
             }
 
-            // Step 7: Verify patches if requested
+            // Compute and display checksums for the patched firmware
+            Log.Information("=== Checksum Repair Phase ===");
+
+            await checksumService.FixChecksums(options.OutputFile, options.OutputFile);
+
+            // Sanity check...
+            var firmware = await File.ReadAllBytesAsync(options.OutputFile);
+            var checksumSegments = checksumService.ComputeAllChecksumsAsync(firmware);
+            Log.Information("Computed checksums for {SegmentCount} segments:", checksumSegments.Count);
+            foreach (var segment in checksumSegments)
+            {
+                Log.Information("  {Segment}", segment);
+            }
+
+            // Verify patches if requested
             if (options.Verify)
             {
                 Log.Information("=== Verification Phase ===");
@@ -169,14 +184,14 @@ class Program
                 }
             }
 
-            // Step 8: Generate report if requested
+            // Generate report if requested
             if (!string.IsNullOrEmpty(options.ReportFile))
             {
                 Log.Information("=== Report Generation ===");
                 patchApplicator.GeneratePatchReport(patches, options.ReportFile);
             }
 
-            // Step 9: Show disassembly for verification
+            // Show disassembly for verification
             if (options.Verbose)
             {
                 Log.Information("=== Disassembly ===");
