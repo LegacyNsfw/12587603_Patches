@@ -16,7 +16,7 @@
 
 ###############################################################################
 # Location of the EOIT tblu.w instruction in the original code
-        .section .code.eoit.hook,"ax",@progbits
+        .section .code.hook.eoit,"ax",@progbits
 PATCH_EOIT_HOOK_START:
         jsr     LowMafEoitPatch
         # This nop is necessary to pave the way to the next instruction in the
@@ -72,6 +72,7 @@ LOW_MAF_EOIT_TABLE:
         .word   0x58d
         .word   0x58d
         .word   0x58d
+        .word   0x58d        
         .word   0x58d
 PATCH_DATA_END:
         .word   0x1234
