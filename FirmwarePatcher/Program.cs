@@ -84,9 +84,9 @@ class Program
             }
 
             // Assemble and link source file
-            Log.Information("=== Assembly Phase ===");
+            // Log.Information("=== Assembly Phase ===");
             
-            var elfFile = await assemblerService.AssembleAsync(options.SourceFile);
+            var elfFile = "patches.elf"; // await assemblerService.AssembleAsync(options.SourceFile);
 
             // Extract symbol table and identify patches
             Log.Information("=== Analysis Phase ===");
@@ -166,10 +166,10 @@ class Program
             // Sanity check...
             var firmware = await File.ReadAllBytesAsync(options.OutputFile);
             var checksumSegments = checksumService.ComputeAllChecksumsAsync(firmware);
-            Log.Information("Computed checksums for {SegmentCount} segments:", checksumSegments.Count);
+            Log.Debug("Computed checksums for {SegmentCount} segments:", checksumSegments.Count);
             foreach (var segment in checksumSegments)
             {
-                Log.Information("  {Segment}", segment);
+                Log.Debug("  {Segment}", segment);
             }
 
             // Verify patches if requested

@@ -38,17 +38,17 @@ public class ChecksumService
     {
         try
         {
-            _logger.Information("Reading checksum segment table at address 0x{Address:X}", CHECKSUM_TABLE_ADDRESS);
+            _logger.Debug("Reading checksum segment table at address 0x{Address:X}", CHECKSUM_TABLE_ADDRESS);
             var segments = ReadChecksumSegmentTable(firmware);
             
-            _logger.Information("Computing checksums for {SegmentCount} segments", segments.Count);
+            _logger.Debug("Computing checksums for {SegmentCount} segments", segments.Count);
             foreach (var segment in segments)
             {
                 segment.CalculatedChecksum = ComputeSegmentChecksum(firmware, segment);
                 _logger.Debug("Computed checksum for {Segment}", segment);
             }
             
-            _logger.Information("Successfully computed all checksums");
+            _logger.Debug("Checksum analysis complete");
             return segments;
         }
         catch (Exception ex)
@@ -66,8 +66,8 @@ public class ChecksumService
         List<ChecksumSegment> segments = this.ComputeAllChecksumsAsync(firmware);
         foreach (var segment in segments)
         {
-            _logger.Information("Fixing checksum for {Segment}", segment);
-            _logger.Information("Current checksum: 0x{Checksum:X8}", segment.CalculatedChecksum);
+            _logger.Debug("Fixing checksum for {Segment}", segment);
+            _logger.Debug("Current checksum: 0x{Checksum:X8}", segment.CalculatedChecksum);
             int address = segment.StartAddress == 0 ? 0x500 : (int)segment.StartAddress;
 
             if (segment.CalculatedChecksum != 0)
@@ -83,7 +83,7 @@ public class ChecksumService
             }
 
             this.ComputeSegmentChecksum(firmware, segment); // Recompute to verify
-            _logger.Information("Verified new checksum: 0x{Checksum:X8}", segment.CalculatedChecksum);
+            _logger.Debug("Verified new checksum: 0x{Checksum:X8}", segment.CalculatedChecksum);
         }
 
         await File.WriteAllBytesAsync(outputPath, firmware);
@@ -138,7 +138,7 @@ public class ChecksumService
             });
 
             _logger.Debug("Found segment {Index}: 0x{Start:X8}-0x{End:X8} ({Size} bytes)",
-                i, startAddress, endAddress, endAddress - startAddress + 1);
+               i, startAddress, endAddress, endAddress - startAddress + 1);
         }
 
         return segments;
