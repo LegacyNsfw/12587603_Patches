@@ -20,12 +20,12 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 | Location of the EOIT tblu.w instruction in the original code
         .section .code.hook.eoit,"ax",@progbits
-PATCH_EOIT_HOOK_START:
+PATCH_HOOK_EOIT_START:
         jsr     LowMafEoitPatch
         | This nop is necessary to pave the way to the next instruction in the
         | original code.
         nop
-PATCH_EOIT_HOOK_END: 
+PATCH_HOOK_EOIT_END: 
         | We need to have something here for the END label to apply to.
         nop
 

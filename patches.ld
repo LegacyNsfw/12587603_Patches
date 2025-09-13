@@ -10,7 +10,7 @@ MEMORY
 SECTIONS
 {
     /* Hook section at original firmware location */
-    .hook : {
+    .patch_hook_eoit : {
         *(.code.hook.eoit)
         KEEP(*(.code.hook.eoit*))
     } >HOOK_EOIT
