@@ -1,8 +1,8 @@
 # This whole thing was vibe-coded
 
-I don't trust it yet, and you shouldn't either.
+I trusted it enough to use it in my car, and it worked, but I'm still a little suspicious.
 
-But it's getting there, which is kind of amazing.
+But it worked, which is kind of amazing.
 
 # Firmware Patcher
 
@@ -172,3 +172,4 @@ Output: patched.bin
 [INFO] Successfully applied 3 patches to firmware
 [INFO] Output written to: patched.bin
 ```
+
