@@ -1,0 +1,8 @@
+*.elf
+*.map
+*.o
+*.bin
+patches_*.txt
+test_*
+FirmwarePatcher/bin/
+FirmwarePatcher/obj/
