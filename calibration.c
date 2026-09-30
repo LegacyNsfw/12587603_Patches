@@ -8,7 +8,7 @@
 // so that it never happens unexpectedly. This value specifies exactly what 
 // "slightly" means.
 
-unsigned short ROM_MINIMUM_THROTTLE_PEDAL_UINT
+unsigned short MinimumThrottlePedalPosition
     __attribute__((section(".data.tables")))
     = (unsigned short)(5 * 51.2);
 
@@ -22,7 +22,7 @@ unsigned short ROM_MINIMUM_THROTTLE_PEDAL_UINT
 //
 // We'll just command a fixed throttle blade angle until the rest of the logic
 // is validated. Then we'll replace this with a properly calculated value.
-unsigned short ROM_TEMPORARY_FIXED_THROTTLE_BLADE_ANGLE_UINT
+unsigned short FixedThrottleBladeAngle
     __attribute__((section(".data.tables")))
     = (unsigned short)(20 * 51.2);
 
@@ -49,7 +49,7 @@ unsigned short ROM_TEMPORARY_FIXED_THROTTLE_BLADE_ANGLE_UINT
 // RPM = (gear_specific_ratio * vehicle speed) >> 12
 ///////////////////////////////////////////////////////////////////////////////
 #define RATIO(x) ((unsigned short)(x * 4096))
-unsigned short ROM_MPH_TO_RPM_FACTOR[]
+unsigned short SpeedToRpmFactorArray[]
     __attribute__((section(".data.tables"))) = {
 
         (unsigned short)RATIO(10),   // 1st gear

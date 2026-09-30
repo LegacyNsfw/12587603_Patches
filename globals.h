@@ -1,7 +1,25 @@
-#ifdef __m68k__
-#define UINT_AT_ADDRESS(addr) (*(unsigned short *)(addr))
+#ifdef DEFINE_HOST_RAM
+    #define EXTERN
 #else
-#define UINT_AT_ADDRESS(addr) host_ram_##addr
+    #define EXTERN extern
+#endif
+
+#ifdef __m68k__
+    #ifdef DEFINE_HOST_RAM
+        #define UINT_AT_ADDRESS(name, addr) unsigned short *name = (unsigned short *)(addr);
+        #define BYTE_AT_ADDRESS(name, addr) unsigned char *name = (unsigned char *)(addr);
+    #else
+        #define UINT_AT_ADDRESS(name, addr) extern unsigned short *name;
+        #define BYTE_AT_ADDRESS(name, addr) extern unsigned char *name;
+    #endif
+#else
+    #ifdef DEFINE_HOST_RAM
+        #define UINT_AT_ADDRESS(name, addr) unsigned short ram_##addr; EXTERN unsigned short *name = &ram_##addr;
+        #define BYTE_AT_ADDRESS(name, addr) unsigned char ram_##addr; EXTERN unsigned char *name = &ram_##addr;
+    #else
+        #define UINT_AT_ADDRESS(name, addr) extern unsigned short *name;
+        #define BYTE_AT_ADDRESS(name, addr) extern unsigned char *name;
+    #endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +30,7 @@
 //
 // Cross-reference: 
 //
-#define RAM_PEDAL_POSITION_UINT UINT_AT_ADDRESS(0xFF900A)
+UINT_AT_ADDRESS(PedalPositionPtr, 0xFF900A)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Current gear.
@@ -21,17 +39,17 @@
 // 1 = second gear
 // etc, etc
 // 8 = clutch pressed
-#define RAM_CURRENT_GEAR_BYTE UINT_AT_ADDRESS(0xFF95DC)
+BYTE_AT_ADDRESS(pCurrentGear, 0xFF95DC)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Previous gear.
 //
-// Same semantics as RAM_CURRENT_GEAR_BYTE, but will never transition to 8
+// Same semantics as pCurrentGear, but will never transition to 8
 // (clutch pressed), so it always identifies the previously engaged gear.
 //
 // TODO: Confirm that we can actually use this address to store the previous gear!
 // It was used by the automatic-transmission logic.
-#define RAM_PREVIOUS_GEAR_BYTE UINT_AT_ADDRESS(0xFF95DC)
+BYTE_AT_ADDRESS(pPreviousGear, 0xFF95DC)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Desired throttle plate angle.
@@ -41,7 +59,7 @@
 // 
 // This is normally set by idle, cruise, or accelerator pedal logic, but those
 // values will be overwritten in order to implement rev matching.
-#define RAM_DESIRED_THROTTLE_PLATE_ANGLE_UINT UINT_AT_ADDRESS(0xFF9050)
+UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFF9050)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Target engine RPM for rev matching.
@@ -51,7 +69,7 @@
 //
 // TODO: Confirm that this address is truly not used
 // AF04 was previously used by automatic-transmission logic.
-#define RAM_TARGET_RPM_UINT UINT_AT_ADDRESS(0xFFAF04)
+UINT_AT_ADDRESS(pTargetRpm, 0xFFAF04)
 
 ///////////////////////////////////////////////////////////////////////////////
 // vehicle speed (actually transmission output shaft speed)
@@ -60,19 +78,4 @@
 // Data type: 16 bit unsigned
 //
 // Cross-reference: Code at 0x084190 determines current gear from RPM and MPH
-#define RAM_VEHICLE_SPEED_UINT UINT_AT_ADDRESS(0xFFA3BE)
-
-#ifndef __m68k__
-#if defined(DEFINE_HOST_RAM)
-#define EXTERN
-#else
-#define EXTERN extern
-#endif
-
-EXTERN unsigned short UINT_AT_ADDRESS(0xFF900A);
-EXTERN unsigned short UINT_AT_ADDRESS(0xFF95DC);
-EXTERN unsigned short UINT_AT_ADDRESS(0xFF9050);
-EXTERN unsigned short UINT_AT_ADDRESS(0xFFAF04);
-EXTERN unsigned short UINT_AT_ADDRESS(0xFFA3BE);
-#endif
-    
+UINT_AT_ADDRESS(pVehicleSpeed, 0xFFA3BE)

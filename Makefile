@@ -1,9 +1,15 @@
 .PHONY: patches selftest clean
 
-AS      := m68k-elf-as
-CC      := m68k-elf-gcc
-LD      := m68k-elf-ld
-OBJDUMP := m68k-elf-objdump
+ifeq ($(OS),Windows_NT)
+M68K_PREFIX := m68k-elf
+else
+M68K_PREFIX := m68k-linux-gnu
+endif
+
+AS      := $(M68K_PREFIX)-as
+CC      := $(M68K_PREFIX)-gcc
+LD      := $(M68K_PREFIX)-ld
+OBJDUMP := $(M68K_PREFIX)-objdump
 HOST_CC := gcc
 
 ASFLAGS := -mcpu=cpu32 -g
