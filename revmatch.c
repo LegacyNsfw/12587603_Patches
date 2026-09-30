@@ -1,116 +1,34 @@
-#define UINT_AT_ADDRESS(addr) (*(unsigned short *)(addr))
+#include "globals.h"
+#include "calibration.h"
+#include "selftest.h"
 
-// TODO
-#define RAM_PEDAL_POSITION_UINT UINT_AT_ADDRESS(0xFF0000)
+void (*ComparePrimaryAndRedundantThrottlePositions)(void) = (void (*)(void)) 0x20A3A;
 
-///////////////////////////////////////////////////////////////////////////////
-// Current gear.
-//
-// 0 = first gear
-// 1 = second gear
-// etc, etc
-// 8 = clutch pressed
-#define RAM_CURRENT_GEAR_BYTE UINT_AT_ADDRESS(0xFF95DC)
+static inline __attribute__((always_inline)) void getTargetRpm(
+    unsigned short ratio,
+    unsigned short vehicle_speed)
+{
+    RAM_TARGET_RPM_UINT = (ratio >> 6) * (vehicle_speed >> 6);
+}
 
-///////////////////////////////////////////////////////////////////////////////
-// Previous gear.
-//
-// Same semantics as RAM_CURRENT_GEAR_BYTE, but will never transition to 8
-// (clutch pressed), so it always identifies the previously engaged gear.
-//
-// TODO: Confirm that we can actually use this address!
-// It was used by the automatic-transmission logic.
-#define RAM_PREVIOUS_GEAR_BYTE UINT_AT_ADDRESS(0xFF95DC)
-
-///////////////////////////////////////////////////////////////////////////////
-// Desired throttle plate angle.
-//
-// Units: percentage * 51.2
-// Data type: 16 bit unsigned
-// 
-// This is normally set by idle, cruise, or accelerator pedal logic, but those
-// values will be overwritten in order to implement rev matching.
-#define RAM_DESIRED_THROTTLE_PLATE_ANGLE_UINT UINT_AT_ADDRESS(0xFF9050)
-
-///////////////////////////////////////////////////////////////////////////////
-// Target engine RPM for rev matching.
-//
-// Units: RPM with what conversion factor? TODO
-// Data type: 16 bit unsigned
-//
-// TODO: Confirm that this address is truly not used
-// AF04 was previously used by automatic-transmission logic.
-#define RAM_TARGET_RPM_UINT UINT_AT_ADDRESS(0xFFAF04)
-
-///////////////////////////////////////////////////////////////////////////////
-// Minimum throttle pedal position to trigger rev-match logic.
-//
-// Units: percentage / 51.2
-// Data type: 16 bit unsigned
-//
-// The driver must press the throttle pedal slightly to trigger rev matching, 
-// so that it never happens unexpectedly. This value specifies exactly what 
-// "slightly" means.
-
-unsigned short ROM_MINIMUM_THROTTLE_PEDAL_UINT
-    __attribute__((section(".data.tables")))
-    = (unsigned short)(5 * 51.2);
-
-///////////////////////////////////////////////////////////////////////////////
-// For temporary use, while validating the rest of the rev-match logic.
-//
-// Units: percentage / 51.2
-// Data type: 16 bit unsigned
-//
-// Cross-reference: Table B2702 / ETC Max Throttle Position Vs. RPM
-//
-// We'll just command a fixed throttle blade angle until the rest of the logic
-// is validated. Then we'll replace this with a properly calculated value.
-unsigned short ROM_TEMPORARY_FIXED_THROTTLE_BLADE_ANGLE_UINT
-    __attribute__((section(".data.tables")))
-    = (unsigned short)(20 * 51.2);
-
-///////////////////////////////////////////////////////////////////////////////
-// Conversion factors from vehicle speed (MPH) to engine RPM.
-//
-// Data type: 16 bit unsigned
-// Units: RPM per MPH * 2^12
-//
-// Cross-reference: Gear ratio thresholds table, 0x019668
-//                  Code at 0x084190
-//
-// To detect the current gear, the factory code does this:
-// RPM = 0xFFA560
-// MPH = 0xFFa3BE (actually transmission output speed)
-// ratio = RPM << 12 / MPH
-//
-// Then it compares the resulting ratio against the values in the gear ratio
-// thresholds table.
-//
-// For rev matching, reversing that match and using a gear-specific ratio will
-// compute the desired engine RPM for a given vehicle speed.
-///////////////////////////////////////////////////////////////////////////////
-unsigned short ROM_MPH_TO_RPM_FACTOR[]
-    __attribute__((section(".data.tables"))) = {
-        (unsigned short)(1000 / 1),
-        (unsigned short)(2000 / 1),
-        (unsigned short)(3000 / 1),
-        (unsigned short)(4000 / 1),
-        (unsigned short)(5000 / 1)
-    };
-
-void (*ComparePrimaryAndRedundantThrottlePositions)(void) = 0x20A3A;
-
+__attribute__((section(".code.implementation")))
 void revMatch(void)
 {
-    if (RAM_CURRENT_GEAR_BYTE != 8) // Clutch not pressed
+    // If the clutch has not been pressed, update the "previous" gear to be the current gear.
+    // This ensures that the previous gear is available even when the clutch is pressed.
+    if (RAM_CURRENT_GEAR_BYTE != 8)
     {
         RAM_PREVIOUS_GEAR_BYTE = RAM_CURRENT_GEAR_BYTE;
     }
 
     // If rev match conditions are not met, just run the normal throttle logic.
-    if (RAM_CURRENT_GEAR_BYTE > 5  || RAM_PEDAL_POSITION_UINT < ROM_MINIMUM_THROTTLE_PEDAL_UINT)
+    if (RAM_PREVIOUS_GEAR_BYTE > 5  || // we don't support downshifting from gears higher than 5 (sixth)
+        RAM_PREVIOUS_GEAR_BYTE == 0 || // we can't downshift from first
+        RAM_CURRENT_GEAR_BYTE != 8 || // clutch is not pressed
+        RAM_PEDAL_POSITION_UINT < ROM_MINIMUM_THROTTLE_PEDAL_UINT)
     {
+        // This function was invoked in place of ComparePrimaryAndRedundantThrottlePositions(),
+        // so under normal conditions we'll just call that function and return.
         ComparePrimaryAndRedundantThrottlePositions();
         return;
     }
@@ -119,4 +37,18 @@ void revMatch(void)
     // For now, we'll just command a fixed throttle blade angle.
     RAM_DESIRED_THROTTLE_PLATE_ANGLE_UINT = ROM_TEMPORARY_FIXED_THROTTLE_BLADE_ANGLE_UINT;
 
+    // But we'll also calculate the target RPM for rev matching.
+    unsigned short gear_index = RAM_CURRENT_GEAR_BYTE;
+    unsigned short ratio = ROM_MPH_TO_RPM_FACTOR[gear_index - 1];
+    getTargetRpm(ratio, RAM_VEHICLE_SPEED_UINT);
+
+    // TODO: look up target throttle plate angle based on the target RPM.
+}
+
+void selfTestRevMatch(void)
+{
+    char* module = "RevMatch";
+    // TODO: use logger to find the speed sensor value at 7000 RPM in first gear
+    getTargetRpm(ROM_MPH_TO_RPM_FACTOR[0], 30);
+    assert(7000, RAM_TARGET_RPM_UINT, module, "Target RPM calculation for first gear at 30 MPH");
 }
