@@ -16,7 +16,7 @@ void main(void)
 {
     printf("\r\n");
     printf("\r\n");
-    selfTestRevMatch();
+    selfTestThrottlePatch();
     printf("\r\n");
 }
 

@@ -19,7 +19,7 @@ static inline __attribute__((always_inline)) void setTargetRpm(
 }
 
 __attribute__((section(".code.implementation")))
-void revMatch(void)
+void throttlePatch(void)
 {
     // If the clutch has not been pressed, update the "previous" gear to be the current gear.
     // This ensures that the previous gear is available after the clutch has been is pressed.
@@ -97,9 +97,9 @@ void revMatch(void)
 #endif
 }
 
-void selfTestRevMatch(void)
+void selfTestThrottlePatch(void)
 {
-    char* module = "RevMatch";
+    char* module = "Throttle";
 
     // TODO, logging: find the actual speed sensor value at 7000 RPM in first gear
     setTargetRpm(SpeedToRpmFactorArray[0], 3600);
@@ -117,7 +117,7 @@ void selfTestRevMatch(void)
     *pPedalPosition = MinimumThrottlePedalPosition - 1;
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
-    revMatch();
+    throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Normal: Rev match logic does not interfere with normal throttle logic");
     assert(0, *pTargetRpm, module, "Normal: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(25), *pDesiredThrottlePlateAngle, module, "Normal: Desired throttle plate angle should not be modified when rev matching not active");
@@ -129,7 +129,7 @@ void selfTestRevMatch(void)
     *pPedalPosition = MinimumThrottlePedalPosition - 1;
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
-    revMatch();
+    throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Clutch: Rev match logic does not interfere with normal throttle logic");
     assert(0, *pTargetRpm, module, "Clutch: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(25), *pDesiredThrottlePlateAngle, module, "Clutch: Desired throttle plate angle should not be modified when rev matching not active");
@@ -141,7 +141,7 @@ void selfTestRevMatch(void)
     *pPedalPosition = MinimumThrottlePedalPosition + 1;
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
-    revMatch();
+    throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Accelerator: Rev match logic does not interfere with normal throttle logic");
     assert(0, *pTargetRpm, module, "Accelerator: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(25), *pDesiredThrottlePlateAngle, module, "Accelerator: Desired throttle plate angle should not be modified when rev matching not active");
@@ -153,7 +153,7 @@ void selfTestRevMatch(void)
     *pPedalPosition = MinimumThrottlePedalPosition + 1;
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
-    revMatch();
+    throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear: Rev match logic does not interfere with normal throttle logic");
     assert(0, *pTargetRpm, module, "First gear: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(25), *pDesiredThrottlePlateAngle, module, "First gear: Desired throttle plate angle should not be modified when rev matching not active");
@@ -165,7 +165,7 @@ void selfTestRevMatch(void)
     *pPedalPosition = MinimumThrottlePedalPosition + 1;
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
-    revMatch();
+    throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Higher-than-6th: Rev match logic does not interfere with normal throttle logic");
     assert(0, *pTargetRpm, module, "Higher-than-6th: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(25), *pDesiredThrottlePlateAngle, module, "Higher-than-6th: Desired throttle plate angle should not be modified when rev matching not active");
@@ -178,7 +178,7 @@ void selfTestRevMatch(void)
     *pTargetRpm = 1000;
     *pDesiredThrottlePlateAngle = PERCENTAGE(25);
     *pVehicleSpeed = 3600;
-    revMatch();
+    throttlePatch();
     assert(0, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "RevMatch: Rev match logic skips default code");
     assert(7000 * 5.12, *pTargetRpm, module, "RevMatch: Target RPM calculated");
     assert(FixedThrottleBladeAngle, *pDesiredThrottlePlateAngle, module, "RevMatch: Desired throttle plate angle should be modified when rev matching is active");
