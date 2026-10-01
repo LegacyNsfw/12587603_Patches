@@ -1,3 +1,5 @@
+#include "calibration.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Minimum throttle pedal position to trigger rev-match logic.
 //
@@ -27,6 +29,17 @@ unsigned short FixedThrottleBladeAngle
     = (unsigned short)(20 * 51.2);
 
 ///////////////////////////////////////////////////////////////////////////////
+// Maximum throttle blade angle for non-rev-matching conditions
+//
+// Units: percentage / 51.2
+// Data type: 16 bit unsigned
+//
+// Cross-reference: Table B2702 / ETC Max Throttle Position Vs. RPM
+unsigned short MaximumThrottleBladeAngle
+    __attribute__((section(".data.tables")))
+    = (unsigned short)(PERCENTAGE(97));
+
+///////////////////////////////////////////////////////////////////////////////
 // Conversion factors from vehicle speed (MPH) to engine RPM.
 //
 // Data type: 16 bit unsigned
@@ -36,7 +49,7 @@ unsigned short FixedThrottleBladeAngle
 //                  Code at 0x084190
 //
 // To detect the current gear, the factory code does this:
-// RPM = 0xFFA560
+// RPM = 0xFFA560 (engine speed, filtered)
 // MPH = 0xFFa3BE (actually transmission output speed)
 // ratio = RPM << 12 / MPH
 //
@@ -52,12 +65,12 @@ unsigned short FixedThrottleBladeAngle
 unsigned short SpeedToRpmFactorArray[]
     __attribute__((section(".data.tables"))) = {
 
-        (unsigned short)RATIO(10),   // 1st gear
-        (unsigned short)RATIO(6.4),  // 2nd gear
-        (unsigned short)RATIO(5.65), // 3rd gear
-        (unsigned short)RATIO(3.4),  // 4th gear
-        (unsigned short)RATIO(2.4),  // 5th gear
-        (unsigned short)RATIO(1.8)   // 6th gear - hey wait you can't downshift into this gear
+        RATIO(10),   // 1st gear
+        RATIO(6.4),  // 2nd gear
+        RATIO(5.65), // 3rd gear
+        RATIO(3.4),  // 4th gear
+        RATIO(2.4),  // 5th gear
+        RATIO(1.8)   // 6th gear - hey wait you can't downshift into this gear
     };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,24 +80,161 @@ unsigned short SpeedToRpmFactorArray[]
 // Cross-reference: B2702, ETC Max Throttle Position vs. RPM
 //
 ///////////////////////////////////////////////////////////////////////////////
-#define PERCENTAGE(x) ((unsigned short) (x * 51.2))
+
 unsigned short RpmToThrottleBladeAngle[]
     __attribute__((section(".data.tables"))) = {
+        PERCENTAGE(10),   // 0
+        PERCENTAGE(10),   // 500
+        PERCENTAGE(12),   // 1500
+        PERCENTAGE(13),   // 2000
+        PERCENTAGE(14),   // 2500
+        PERCENTAGE(15),   // 3000
+        PERCENTAGE(16),   // 3500
+        PERCENTAGE(17),   // 4000
+        PERCENTAGE(18),   // 4500
+        PERCENTAGE(20),   // 5000
+        PERCENTAGE(22),   // 5500
+        PERCENTAGE(24),   // 6000
+        PERCENTAGE(26),   // 6500
+        PERCENTAGE(28),   // 7000
+        PERCENTAGE(30),   // 7500
+        PERCENTAGE(32),   // 8000
+    };
 
-        (unsigned short)PERCENTAGE(10),   // 0
-        (unsigned short)PERCENTAGE(10),   // 500
-        (unsigned short)PERCENTAGE(12),   // 1500
-        (unsigned short)PERCENTAGE(13),   // 2000
-        (unsigned short)PERCENTAGE(14),   // 2500
-        (unsigned short)PERCENTAGE(15),   // 3000
-        (unsigned short)PERCENTAGE(16),   // 3500
-        (unsigned short)PERCENTAGE(17),   // 4000
-        (unsigned short)PERCENTAGE(18),   // 4500
-        (unsigned short)PERCENTAGE(20),   // 5000
-        (unsigned short)PERCENTAGE(22),   // 5500
-        (unsigned short)PERCENTAGE(24),   // 6000
-        (unsigned short)PERCENTAGE(26),   // 6500
-        (unsigned short)PERCENTAGE(28),   // 7000
-        (unsigned short)PERCENTAGE(30),   // 7500
-        (unsigned short)PERCENTAGE(32),   // 8000
+unsigned short ClutchThrottleLimit[]
+    __attribute__((section(".data.tables"))) = {
+        PERCENTAGE(25),   // 0
+        PERCENTAGE(25),   // 500
+        PERCENTAGE(25),   // 1500
+        PERCENTAGE(25),   // 2000
+        PERCENTAGE(25),   // 2500
+        PERCENTAGE(25),   // 3000
+        PERCENTAGE(25),   // 3500
+        PERCENTAGE(25),   // 4000
+        PERCENTAGE(25),   // 4500
+        PERCENTAGE(25),   // 5000
+        PERCENTAGE(25),   // 5500
+        PERCENTAGE(25),   // 6000
+        PERCENTAGE(25),   // 6500
+        PERCENTAGE(25),   // 7000
+        PERCENTAGE(25),   // 7500
+        PERCENTAGE(25),   // 8000
+    };
+
+unsigned short PerGearThrottleLimit[6][16]
+    __attribute__((section(".data.tables"))) = {
+        // First gear
+        {
+            PERCENTAGE(50),   // 0
+            PERCENTAGE(50),   // 500
+            PERCENTAGE(50),   // 1500
+            PERCENTAGE(50),   // 2000
+            PERCENTAGE(50),   // 2500
+            PERCENTAGE(50),   // 3000
+            PERCENTAGE(50),   // 3500
+            PERCENTAGE(50),   // 4000
+            PERCENTAGE(50),   // 4500
+            PERCENTAGE(50),   // 5000
+            PERCENTAGE(50),   // 5500
+            PERCENTAGE(50),   // 6000
+            PERCENTAGE(50),   // 6500
+            PERCENTAGE(50),   // 7000
+            PERCENTAGE(50),   // 7500
+            PERCENTAGE(50),   // 8000
+        },
+        // Second gear
+        {
+            PERCENTAGE(75),   // 0
+            PERCENTAGE(75),   // 500
+            PERCENTAGE(75),   // 1500
+            PERCENTAGE(75),   // 2000
+            PERCENTAGE(75),   // 2500
+            PERCENTAGE(75),   // 3000
+            PERCENTAGE(75),   // 3500
+            PERCENTAGE(75),   // 4000
+            PERCENTAGE(75),   // 4500
+            PERCENTAGE(75),   // 5000
+            PERCENTAGE(75),   // 5500
+            PERCENTAGE(75),   // 6000
+            PERCENTAGE(75),   // 6500
+            PERCENTAGE(75),   // 7000
+            PERCENTAGE(75),   // 7500
+            PERCENTAGE(75),   // 8000
+        },
+        // Third gear
+        {
+            PERCENTAGE(100),   // 0
+            PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1500
+            PERCENTAGE(100),   // 2000
+            PERCENTAGE(100),   // 2500
+            PERCENTAGE(100),   // 3000
+            PERCENTAGE(100),   // 3500
+            PERCENTAGE(100),   // 4000
+            PERCENTAGE(100),   // 4500
+            PERCENTAGE(100),   // 5000
+            PERCENTAGE(100),   // 5500
+            PERCENTAGE(100),   // 6000
+            PERCENTAGE(100),   // 6500
+            PERCENTAGE(100),   // 7000
+            PERCENTAGE(100),   // 7500
+            PERCENTAGE(100),   // 8000
+        },
+        // Fourth gear
+        {
+            PERCENTAGE(100),   // 0
+            PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1500
+            PERCENTAGE(100),   // 2000
+            PERCENTAGE(100),   // 2500
+            PERCENTAGE(100),   // 3000
+            PERCENTAGE(100),   // 3500
+            PERCENTAGE(100),   // 4000
+            PERCENTAGE(100),   // 4500
+            PERCENTAGE(100),   // 5000
+            PERCENTAGE(100),   // 5500
+            PERCENTAGE(100),   // 6000
+            PERCENTAGE(100),   // 6500
+            PERCENTAGE(100),   // 7000
+            PERCENTAGE(100),   // 7500
+            PERCENTAGE(100),   // 8000
+        },    
+        // Fifth gear
+        {
+            PERCENTAGE(100),   // 0
+            PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1500
+            PERCENTAGE(100),   // 2000
+            PERCENTAGE(100),   // 2500
+            PERCENTAGE(100),   // 3000
+            PERCENTAGE(100),   // 3500
+            PERCENTAGE(100),   // 4000
+            PERCENTAGE(100),   // 4500
+            PERCENTAGE(100),   // 5000
+            PERCENTAGE(100),   // 5500
+            PERCENTAGE(100),   // 6000
+            PERCENTAGE(100),   // 6500
+            PERCENTAGE(100),   // 7000
+            PERCENTAGE(100),   // 7500
+            PERCENTAGE(100),   // 8000
+        },
+        // Sixth gear
+        {
+            PERCENTAGE(100),   // 0
+            PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1500
+            PERCENTAGE(100),   // 2000
+            PERCENTAGE(100),   // 2500
+            PERCENTAGE(100),   // 3000
+            PERCENTAGE(100),   // 3500
+            PERCENTAGE(100),   // 4000
+            PERCENTAGE(100),   // 4500
+            PERCENTAGE(100),   // 5000
+            PERCENTAGE(100),   // 5500
+            PERCENTAGE(100),   // 6000
+            PERCENTAGE(100),   // 6500
+            PERCENTAGE(100),   // 7000
+            PERCENTAGE(100),   // 7500
+            PERCENTAGE(100),   // 8000
+        },
     };
