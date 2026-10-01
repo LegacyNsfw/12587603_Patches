@@ -10,7 +10,9 @@ Use at your own risk. The contents of this repo represent work in progress, not 
 
 To build on Windows you'll need the m68k gcc tools. I used the version from [GnuToolChains.com](https://gnutoolchains.com/m68k-elf/) and put a copy in the Resources directory just in case.
 
-You can also build the patches on WSL with Ubuntu and "sudo apt install gcc-m68k-linux-gnu". The self-test script only builds under WSL right now, but I'll add native Windows eventually.
+You can also build the patches on WSL with Ubuntu and "sudo apt install gcc-m68k-linux-gnu".
+
+To build and run the tests on Windows, you'll need a gcc toolchain that builds Windows executables. I used [MinGW-64](https://github.com/niXman/mingw-builds-binaries/releases) (blessed by [mingw-w64.org](https://www.mingw-w64.org/downloads/#mingw-w64-builds)) and I've put a copy in the Resources directory just in case. You'll want to unzip that in c:\ and add c:\mingw32\bin to your path.
 
 ### Building And Testing
 

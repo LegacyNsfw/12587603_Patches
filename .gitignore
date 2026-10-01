@@ -1,4 +1,5 @@
 selftest
+selftest.exe
 *.elf
 *.map
 *.o
