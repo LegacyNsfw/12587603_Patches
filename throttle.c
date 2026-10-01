@@ -86,14 +86,8 @@ void throttlePatch(void)
         *pMaxThrottle = PERCENTAGE(100);
         if (*pCurrentGear >= 0 && *pCurrentGear < 6)
         {
-            unsigned short *pThrottleLimitTable = PerGearThrottleLimit[*pCurrentGear - 1];
+            unsigned short *pThrottleLimitTable = PerGearThrottleLimit[*pCurrentGear];
             lookupThrottleBladeAngle(pThrottleLimitTable, pEngineSpeed, pMaxThrottle);
-        }
-
-        // If the clutch is pressed, use the clutch-specific throttle limit.
-        if (*pCurrentGear == CLUTCH) 
-        {
-            *pMaxThrottle = ClutchThrottleLimit[*pVehicleSpeed >> 6];
         }
 
         // Global maximum throttle blade angle, to simplify life with LS3-style throttle bodies.
@@ -221,7 +215,7 @@ void selfTestThrottlePatch(void)
     *pVehicleSpeed = 3600;
     printf("Before throttlePatch: DesiredThrottlePlateAngle = %d\n", *pDesiredThrottlePlateAngle);
     throttlePatch();
-    assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear limit: Rev match logic does not interfere with normal throttle logic");
+    assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear limit: Skip the rev match logic, call the default code");
     assert(0, *pTargetRpm, module, "First gear limit: Target RPM should not be set when rev matching not active");
-    assert(PERCENTAGE(50), *pDesiredThrottlePlateAngle, module, "First gear limit: Desired throttle plate angle should not be modified when rev matching not active");
+    assert(PERCENTAGE(50), *pDesiredThrottlePlateAngle, module, "First gear limit: Desired throttle plate angle should be limited by the first-gear table");
 }
