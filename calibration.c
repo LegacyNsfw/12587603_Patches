@@ -57,5 +57,34 @@ unsigned short SpeedToRpmFactorArray[]
         (unsigned short)RATIO(5.65), // 3rd gear
         (unsigned short)RATIO(3.4),  // 4th gear
         (unsigned short)RATIO(2.4),  // 5th gear
-        (unsigned short)RATIO(1.8)   // 6th gear
+        (unsigned short)RATIO(1.8)   // 6th gear - hey wait you can't downshift into this gear
+    };
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Specifies the throttle blade angle that will produce the desired RPM.
+// 
+// Cross-reference: B2702, ETC Max Throttle Position vs. RPM
+//
+///////////////////////////////////////////////////////////////////////////////
+#define PERCENTAGE(x) ((unsigned short) (x * 51.2))
+unsigned short RpmToThrottleBladeAngle[]
+    __attribute__((section(".data.tables"))) = {
+
+        (unsigned short)PERCENTAGE(10),   // 0
+        (unsigned short)PERCENTAGE(10),   // 500
+        (unsigned short)PERCENTAGE(12),   // 1500
+        (unsigned short)PERCENTAGE(13),   // 2000
+        (unsigned short)PERCENTAGE(14),   // 2500
+        (unsigned short)PERCENTAGE(15),   // 3000
+        (unsigned short)PERCENTAGE(16),   // 3500
+        (unsigned short)PERCENTAGE(17),   // 4000
+        (unsigned short)PERCENTAGE(18),   // 4500
+        (unsigned short)PERCENTAGE(20),   // 5000
+        (unsigned short)PERCENTAGE(22),   // 5500
+        (unsigned short)PERCENTAGE(24),   // 6000
+        (unsigned short)PERCENTAGE(26),   // 6500
+        (unsigned short)PERCENTAGE(28),   // 7000
+        (unsigned short)PERCENTAGE(30),   // 7500
+        (unsigned short)PERCENTAGE(32),   // 8000
     };

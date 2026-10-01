@@ -1,25 +1,14 @@
-#ifdef DEFINE_HOST_RAM
-    #define EXTERN
-#else
-    #define EXTERN extern
-#endif
-
-#ifdef __m68k__
-    #ifdef DEFINE_HOST_RAM
+#ifdef DEFINE_RAM_ADDRESSES
+    #ifdef __m68k__
         #define UINT_AT_ADDRESS(name, addr) unsigned short *name = (unsigned short *)(addr);
         #define BYTE_AT_ADDRESS(name, addr) unsigned char *name = (unsigned char *)(addr);
     #else
-        #define UINT_AT_ADDRESS(name, addr) extern unsigned short *name;
-        #define BYTE_AT_ADDRESS(name, addr) extern unsigned char *name;
+        #define UINT_AT_ADDRESS(name, addr) unsigned short ram_##addr; unsigned short *name = &ram_##addr;
+        #define BYTE_AT_ADDRESS(name, addr) unsigned char ram_##addr; unsigned char *name = &ram_##addr;
     #endif
 #else
-    #ifdef DEFINE_HOST_RAM
-        #define UINT_AT_ADDRESS(name, addr) unsigned short ram_##addr; EXTERN unsigned short *name = &ram_##addr;
-        #define BYTE_AT_ADDRESS(name, addr) unsigned char ram_##addr; EXTERN unsigned char *name = &ram_##addr;
-    #else
         #define UINT_AT_ADDRESS(name, addr) extern unsigned short *name;
         #define BYTE_AT_ADDRESS(name, addr) extern unsigned char *name;
-    #endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +19,7 @@
 //
 // Cross-reference: 
 //
-UINT_AT_ADDRESS(PedalPositionPtr, 0xFF900A)
+UINT_AT_ADDRESS(pPedalPosition, 0xFF900A)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Current gear.
@@ -59,7 +48,12 @@ BYTE_AT_ADDRESS(pPreviousGear, 0xFF95DC)
 // 
 // This is normally set by idle, cruise, or accelerator pedal logic, but those
 // values will be overwritten in order to implement rev matching.
-UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFF9050)
+//
+// Uncomment to actually overwrite the throttle plate angle:
+// UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFF9050)
+//
+// TODO: confirm that this is not used by manual-transmission logic.
+UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFFAF02)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Target engine RPM for rev matching.

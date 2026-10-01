@@ -10,7 +10,7 @@ Use at your own risk. The contents of this repo represent work in progress, not 
 
 To build on Windows you'll need the m68k gcc tools. I used the version from [GnuToolChains.com](https://gnutoolchains.com/m68k-elf/) and put a copy in the Resources directory just in case.
 
-You can also build the patches on WSL with Ubuntu and "sudo apt install gcc-m68k-linux-gnu". The self-test script only builds under WSL right now - I gotta fix that.
+You can also build the patches on WSL with Ubuntu and "sudo apt install gcc-m68k-linux-gnu". The self-test script only builds under WSL right now, but I'll add native Windows eventually.
 
 ### Building And Testing
 
@@ -40,7 +40,9 @@ In theory it would be better to interpolate between the two, but in practice I s
 
 ## Rev-Matched Downshifts
 
-I implemented this for my Subaru years ago, and I think I can make it work here too - but I have to admit that I'm not certain. The TAC module might be an obstacle. We'll see.
+I implemented this for my Subaru years ago, and I think I can make it work for 2004 Corvettes too - but I have to admit that I'm not certain. The TAC module might be an obstacle. We'll see.
+
+If this works, I'll add instructions for putting a 2004 PCM into 99-03 Corvettes. It only requires moving one pin.
 
 ## Per-Gear Maximum Throttle
 

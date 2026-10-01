@@ -1,7 +1,6 @@
-#define DEFINE_HOST_RAM
+#define DEFINE_RAM_ADDRESSES
 #include "globals.h"
 #include "selftest.h"
-
 
 #ifdef __m68k__
 int printf(const char *format, ...)
@@ -15,13 +14,20 @@ int printf(const char *format, ...)
 
 void main(void)
 {
+    printf("\r\n");
+    printf("\r\n");
     selfTestRevMatch();
+    printf("\r\n");
 }
 
 void assert(unsigned short expected, unsigned short actual, char* module, char* message)
 {
-    if (expected != actual)
+    if (expected == actual)
     {
-        printf("Assertion failed in module %s: %s. Expected %u, got %u\n", module, message, expected, actual);
+        printf("[PASS] %s: %s.\r\n", module, message);
+    }
+    else
+    {
+        printf("[FAIL] %s: %s. Expected %u, got %u\r\n", module, message, expected, actual);
     }
 }
