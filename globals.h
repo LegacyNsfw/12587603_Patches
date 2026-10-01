@@ -52,10 +52,22 @@ BYTE_AT_ADDRESS(pPreviousGear, 0xFF95DC)
 // values will be overwritten in order to implement rev matching.
 //
 // Uncomment to actually overwrite the throttle plate angle:
+UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFF9050)
+
+///////////////////////////////////////////////////////////////////////////////
+// TEST ONLY - Desired throttle plate angle.
+//
+// Units: percentage * 51.2
+// Data type: 16 bit unsigned
+// 
+// This is normally set by idle, cruise, or accelerator pedal logic, but those
+// values will be overwritten in order to implement rev matching.
+//
+// Uncomment to actually overwrite the throttle plate angle:
 // UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFF9050)
 //
 // TODO, logging:Confirm that this address is not used by manual-transmission logic.
-UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFFAF02)
+UINT_AT_ADDRESS(pTestDesiredThrottlePlateAngle, 0xFFAF02)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Target engine RPM for rev matching.
@@ -66,6 +78,16 @@ UINT_AT_ADDRESS(pDesiredThrottlePlateAngle, 0xFFAF02)
 // TODO, logging: Confirm that this address is truly not used by manual-transmission logic.
 // AF04 was previously used by automatic-transmission logic.
 UINT_AT_ADDRESS(pTargetRpm, 0xFFAF04)
+
+///////////////////////////////////////////////////////////////////////////////
+// Maximum allowable throttle blade angle.
+//
+// Units: percentage * 51.2
+// Data type: 16 bit unsigned
+//
+// TODO, logging: Confirm that this address is truly not used by manual-transmission logic.
+// AF04 was previously used by automatic-transmission logic.
+UINT_AT_ADDRESS(pMaxThrottle, 0xFFAF06)
 
 ///////////////////////////////////////////////////////////////////////////////
 // vehicle speed (actually transmission output shaft speed)

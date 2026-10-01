@@ -4,6 +4,7 @@ extern unsigned short MinimumThrottlePedalPosition;
 extern unsigned short FixedThrottleBladeAngle;
 extern unsigned short SpeedToRpmFactorArray[];
 extern unsigned short MaximumThrottleBladeAngle;
+extern unsigned short RpmToThrottleBladeAngle[];
 extern unsigned short ClutchThrottleLimit[16];
 extern unsigned short PerGearThrottleLimit[6][16];
 

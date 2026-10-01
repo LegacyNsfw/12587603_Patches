@@ -11,11 +11,54 @@ void ComparePrimaryAndRedundantThrottlePositions(void) { comparePrimaryAndRedund
 #endif
 
 // This is factored out to support unit testing.
-static inline __attribute__((always_inline)) void setTargetRpm(
+static inline __attribute__((always_inline))
+void setTargetRpm(
     unsigned short ratio,
     unsigned short vehicle_speed)
 {
     *pTargetRpm = (ratio >> 6) * (vehicle_speed >> 6);
+}
+
+// This is factored out to enable it to be called from two places.
+static inline __attribute__((always_inline))
+void lookupThrottleBladeAngle(
+    unsigned short *pRpmToThrottleBladeAngleTable,
+    unsigned short *pInputRpm,
+    unsigned short *pOutputThrottleBladeAngle)
+{
+#ifdef __m68k__
+    __asm__ volatile (
+        "movea.w  #0x1000,%%a2            \n\t"
+        "move.w   %[target_rpm],%%d4      \n\t"
+        "cmpi.w   #0x1000,%%d4            \n\t"
+        "bcc      1f                      \n\t"
+        "andi.l   #0xFFFF,%%d4            \n\t"
+        "divu.w   #0xA,%%d4               \n\t"
+        "bra      2f                      \n\t"
+        "1:                               \n\t"
+        "move.w   #0x1000,%%d4            \n\t"
+        "2:                               \n\t"
+        "tblu.w   (%[table],%%d4.w),%%d4  \n\t"
+        "move.w   %%d4,%[throttle_angle]  \n\t"
+        : [throttle_angle] "=m"(*pOutputThrottleBladeAngle)
+        : [target_rpm] "m"(*pInputRpm),
+          [table] "a"(pRpmToThrottleBladeAngleTable)
+        : "d4", "a2", "cc", "memory"
+    );
+#else
+    // For testing on non-m68k platforms, implement table lookup with interpolation in code.
+    unsigned short target_rpm = *pInputRpm;
+    int low_index = target_rpm / 500;
+    if (low_index < 0) { *pOutputThrottleBladeAngle = pRpmToThrottleBladeAngleTable[0]; return; }
+    if (low_index >= 15) { *pOutputThrottleBladeAngle = pRpmToThrottleBladeAngleTable[15]; return; }
+    int high_index = low_index + 1;
+    int low_value = pRpmToThrottleBladeAngleTable[low_index];
+    int high_value = pRpmToThrottleBladeAngleTable[high_index];
+
+    // Linear interpolation
+    int fraction = target_rpm % 500;
+    *pOutputThrottleBladeAngle = low_value + ((high_value - low_value) * fraction) / 500;
+#endif
 }
 
 __attribute__((section(".code.implementation")))
@@ -40,29 +83,30 @@ void throttlePatch(void)
         *pTargetRpm = 0;
 
         // Determine the maximum allowable throttle blade angle based on the current gear.
-        unsigned short maxThrottle = PERCENTAGE(100);
+        *pMaxThrottle = PERCENTAGE(100);
         if (*pCurrentGear >= 0 && *pCurrentGear < 6)
         {
-            maxThrottle = PerGearThrottleLimit[*pCurrentGear - 1][*pVehicleSpeed >> 6];
+            unsigned short *pThrottleLimitTable = PerGearThrottleLimit[*pCurrentGear - 1];
+            lookupThrottleBladeAngle(pThrottleLimitTable, pEngineSpeed, pMaxThrottle);
         }
 
         // If the clutch is pressed, use the clutch-specific throttle limit.
         if (*pCurrentGear == CLUTCH) 
         {
-            maxThrottle = ClutchThrottleLimit[*pVehicleSpeed >> 6];
+            *pMaxThrottle = ClutchThrottleLimit[*pVehicleSpeed >> 6];
         }
 
         // Global maximum throttle blade angle, to simplify life with LS3-style throttle bodies.
         // This way you don't need to put 97% everywhere in the tables where you really mean 100%.
-        if (maxThrottle > MaximumThrottleBladeAngle)
+        if (*pMaxThrottle > MaximumThrottleBladeAngle)
         {
-            maxThrottle = MaximumThrottleBladeAngle;
+            *pMaxThrottle = MaximumThrottleBladeAngle;
         }
 
         // Actually enforce the limit.
-        if (*pDesiredThrottlePlateAngle > maxThrottle)
+        if (*pDesiredThrottlePlateAngle > *pMaxThrottle)
         {
-            *pDesiredThrottlePlateAngle = maxThrottle;
+            *pDesiredThrottlePlateAngle = *pMaxThrottle;
         }
         return;
     }
@@ -76,25 +120,8 @@ void throttlePatch(void)
     unsigned short ratio = SpeedToRpmFactorArray[gear_index - 1];
     setTargetRpm(ratio, *pVehicleSpeed);
 
-#ifdef __m68k__
-    __asm__ volatile (
-        "movea.w  #0x1000,%%a2            \n\t"
-        "move.w   %[target_rpm],%%d4      \n\t"
-        "cmpi.w   #0x1000,%%d4            \n\t"
-        "bcc      1f                      \n\t"
-        "andi.l   #0xFFFF,%%d4            \n\t"
-        "divu.w   #0xA,%%d4               \n\t"
-        "bra      2f                      \n\t"
-        "1:                               \n\t"
-        "move.w   #0x1000,%%d4            \n\t"
-        "2:                               \n\t"
-        "tblu.w   (RpmToThrottleBladeAngle).l,%%d4\n\t"
-        "move.w   %%d4,%[throttle_angle]  \n\t"
-        : [throttle_angle] "=m"(*pDesiredThrottlePlateAngle)
-        : [target_rpm] "m"(*pTargetRpm)
-        : "d4", "a2", "cc", "memory"
-    );
-#endif
+    // Look up the desired throttle blade angle based on the target RPM.
+    lookupThrottleBladeAngle(RpmToThrottleBladeAngle, pTargetRpm, pTestDesiredThrottlePlateAngle);
 }
 
 void selfTestThrottlePatch(void)
@@ -181,5 +208,20 @@ void selfTestThrottlePatch(void)
     throttlePatch();
     assert(0, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "RevMatch: Rev match logic skips default code");
     assert(7000 * 5.12, *pTargetRpm, module, "RevMatch: Target RPM calculated");
-    assert(FixedThrottleBladeAngle, *pDesiredThrottlePlateAngle, module, "RevMatch: Desired throttle plate angle should be modified when rev matching is active");
+    assert(FixedThrottleBladeAngle, *pDesiredThrottlePlateAngle, module, "RevMatch: Desired throttle plate angle should be fixed for now");
+    assert(1638, *pTestDesiredThrottlePlateAngle, module, "RevMatch: Compute the real throttle plate angle");
+    
+    // Show that throttle is limited by the first-gear throttle limit table
+    comparePrimaryAndRedundantThrottlePositionsInvoked = 0;
+    *pPreviousGear = 0;
+    *pCurrentGear = 0;
+    *pPedalPosition = PERCENTAGE(100);
+    *pTargetRpm = 0;
+    *pDesiredThrottlePlateAngle = PERCENTAGE(100);
+    *pVehicleSpeed = 3600;
+    printf("Before throttlePatch: DesiredThrottlePlateAngle = %d\n", *pDesiredThrottlePlateAngle);
+    throttlePatch();
+    assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear limit: Rev match logic does not interfere with normal throttle logic");
+    assert(0, *pTargetRpm, module, "First gear limit: Target RPM should not be set when rev matching not active");
+    assert(PERCENTAGE(50), *pDesiredThrottlePlateAngle, module, "First gear limit: Desired throttle plate angle should not be modified when rev matching not active");
 }
