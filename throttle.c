@@ -118,6 +118,7 @@ void throttlePatch(void)
     lookupThrottleBladeAngle(RpmToThrottleBladeAngle, pTargetRpm, pTestDesiredThrottlePlateAngle);
 }
 
+#ifndef __m68k__
 void selfTestThrottlePatch(void)
 {
     char* module = "Throttle";
@@ -244,3 +245,4 @@ void selfTestThrottlePatch(void)
     assert(0, *pTargetRpm, module, "Global limit: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(97), *pDesiredThrottlePlateAngle, module, "Global limit: Desired throttle plate angle should be limited by the global table");
 }
+#endif

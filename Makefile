@@ -13,7 +13,7 @@ OBJDUMP := $(M68K_PREFIX)-objdump
 HOST_CC := gcc
 
 ASFLAGS := -mcpu=cpu32 -g
-CFLAGS  := -mcpu=cpu32 -ffreestanding -c -g
+CFLAGS  := -mcpu=cpu32 -ffreestanding -c -g -O2
 
 PATCH_OBJECTS := patches_debug.o throttle.o calibration.o main.o
 PATCH_OUTPUTS := patches.elf patches_disasm.txt patches_hexdump.txt patches_full.txt

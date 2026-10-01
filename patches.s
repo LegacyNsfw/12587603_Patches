@@ -30,6 +30,15 @@ PATCH_HOOK_EOIT_END:
         nop
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+| Location of the ComparePrimaryAndRedundant jsr instruction in the original code
+        .section .code.hook.throttle,"ax",@progbits
+PATCH_HOOK_THROTTLE_START:
+        jsr     throttlePatch
+PATCH_HOOK_THROTTLE_END: 
+        | We need to have something here for the END label to apply to.
+        nop
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 | Base address for patch code
         .section .code.implementation
 PATCH_CODE_START:

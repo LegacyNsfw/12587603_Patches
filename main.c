@@ -12,6 +12,9 @@ int printf(const char *format, ...)
 #include <stdio.h>
 #endif
 
+#ifdef __m68k__
+void main(void) {}
+#else
 void main(void)
 {
     printf("\r\n");
@@ -31,3 +34,5 @@ void assert(unsigned short expected, unsigned short actual, char* module, char* 
         printf("[FAIL] %s: %s. Expected %u, got %u\r\n", module, message, expected, actual);
     }
 }
+
+#endif
