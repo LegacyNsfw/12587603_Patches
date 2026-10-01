@@ -15,18 +15,18 @@ HOST_CC := gcc
 ASFLAGS := -mcpu=cpu32 -g
 CFLAGS  := -mcpu=cpu32 -ffreestanding -c -g
 
-PATCH_OBJECTS := patches_debug.o revmatch.o calibration.o main.o
+PATCH_OBJECTS := patches_debug.o throttle.o calibration.o main.o
 PATCH_OUTPUTS := patches.elf patches_disasm.txt patches_hexdump.txt patches_full.txt
 
 patches: $(PATCH_OUTPUTS)
 
-selftest: main.c revmatch.c calibration.c globals.h calibration.h selftest.h
-	$(HOST_CC) -g -o $@ main.c revmatch.c calibration.c
+selftest: main.c throttle.c calibration.c globals.h calibration.h selftest.h
+	$(HOST_CC) -g -o $@ main.c throttle.c calibration.c
 
 patches_debug.o: patches.s
 	$(AS) $(ASFLAGS) -o $@ $<
 
-revmatch.o: revmatch.c globals.h calibration.h selftest.h
+throttle.o: throttle.c globals.h calibration.h selftest.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 calibration.o: calibration.c
