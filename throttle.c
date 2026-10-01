@@ -213,7 +213,6 @@ void selfTestThrottlePatch(void)
     *pTargetRpm = 0;
     *pDesiredThrottlePlateAngle = PERCENTAGE(100);
     *pVehicleSpeed = 3600;
-    printf("Before throttlePatch: DesiredThrottlePlateAngle = %d\n", *pDesiredThrottlePlateAngle);
     throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear limit: Skip the rev match logic, call the default code");
     assert(0, *pTargetRpm, module, "First gear limit: Target RPM should not be set when rev matching not active");
@@ -227,9 +226,21 @@ void selfTestThrottlePatch(void)
     *pTargetRpm = 0;
     *pDesiredThrottlePlateAngle = PERCENTAGE(100);
     *pVehicleSpeed = 3600;
-    printf("Before throttlePatch: DesiredThrottlePlateAngle = %d\n", *pDesiredThrottlePlateAngle);
     throttlePatch();
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Second gear limit: Skip the rev match logic, call the default code");
     assert(0, *pTargetRpm, module, "Second gear limit: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(75), *pDesiredThrottlePlateAngle, module, "Second gear limit: Desired throttle plate angle should be limited by the second-gear table");
+
+    // Show that throttle is limited by the global limit
+    comparePrimaryAndRedundantThrottlePositionsInvoked = 0;
+    *pPreviousGear = 5;
+    *pCurrentGear = 5;
+    *pPedalPosition = PERCENTAGE(100);
+    *pTargetRpm = 0;
+    *pDesiredThrottlePlateAngle = PERCENTAGE(100);
+    *pVehicleSpeed = 3600;
+    throttlePatch();
+    assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Global limit: Skip the rev match logic, call the default code");
+    assert(0, *pTargetRpm, module, "Global limit: Target RPM should not be set when rev matching not active");
+    assert(PERCENTAGE(97), *pDesiredThrottlePlateAngle, module, "Global limit: Desired throttle plate angle should be limited by the global table");
 }

@@ -101,26 +101,6 @@ unsigned short RpmToThrottleBladeAngle[]
         PERCENTAGE(32),   // 8000
     };
 
-unsigned short ClutchThrottleLimit[]
-    __attribute__((section(".data.tables"))) = {
-        PERCENTAGE(25),   // 0
-        PERCENTAGE(25),   // 500
-        PERCENTAGE(25),   // 1500
-        PERCENTAGE(25),   // 2000
-        PERCENTAGE(25),   // 2500
-        PERCENTAGE(25),   // 3000
-        PERCENTAGE(25),   // 3500
-        PERCENTAGE(25),   // 4000
-        PERCENTAGE(25),   // 4500
-        PERCENTAGE(25),   // 5000
-        PERCENTAGE(25),   // 5500
-        PERCENTAGE(25),   // 6000
-        PERCENTAGE(25),   // 6500
-        PERCENTAGE(25),   // 7000
-        PERCENTAGE(25),   // 7500
-        PERCENTAGE(25),   // 8000
-    };
-
 unsigned short PerGearThrottleLimit[6][16]
     __attribute__((section(".data.tables"))) = {
         // First gear
