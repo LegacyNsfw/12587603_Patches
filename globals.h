@@ -17,7 +17,7 @@
 // Units: TODO: find out accelerator pedal position units by logging the raw value.
 // Data type: 16 bit unsigned
 //
-// Cross-reference: 
+// Cross-reference: TODO
 //
 UINT_AT_ADDRESS(pPedalPosition, 0xFF900A)
 
@@ -28,7 +28,9 @@ UINT_AT_ADDRESS(pPedalPosition, 0xFF900A)
 // 1 = second gear
 // etc, etc
 // 8 = clutch pressed
-BYTE_AT_ADDRESS(pCurrentGear, 0xFF95DC)
+//
+BYTE_AT_ADDRESS(pCurrentGear, 0xFFA3B8)
+#define CLUTCH 8
 
 ///////////////////////////////////////////////////////////////////////////////
 // Previous gear.
