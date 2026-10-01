@@ -218,4 +218,18 @@ void selfTestThrottlePatch(void)
     assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "First gear limit: Skip the rev match logic, call the default code");
     assert(0, *pTargetRpm, module, "First gear limit: Target RPM should not be set when rev matching not active");
     assert(PERCENTAGE(50), *pDesiredThrottlePlateAngle, module, "First gear limit: Desired throttle plate angle should be limited by the first-gear table");
+
+    // Show that throttle is limited by the second-gear throttle limit table
+    comparePrimaryAndRedundantThrottlePositionsInvoked = 0;
+    *pPreviousGear = 1;
+    *pCurrentGear = 1;
+    *pPedalPosition = PERCENTAGE(100);
+    *pTargetRpm = 0;
+    *pDesiredThrottlePlateAngle = PERCENTAGE(100);
+    *pVehicleSpeed = 3600;
+    printf("Before throttlePatch: DesiredThrottlePlateAngle = %d\n", *pDesiredThrottlePlateAngle);
+    throttlePatch();
+    assert(1, comparePrimaryAndRedundantThrottlePositionsInvoked, module, "Second gear limit: Skip the rev match logic, call the default code");
+    assert(0, *pTargetRpm, module, "Second gear limit: Target RPM should not be set when rev matching not active");
+    assert(PERCENTAGE(75), *pDesiredThrottlePlateAngle, module, "Second gear limit: Desired throttle plate angle should be limited by the second-gear table");
 }
