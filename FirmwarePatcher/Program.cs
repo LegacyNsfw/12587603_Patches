@@ -63,6 +63,7 @@ class Program
             // Initialize services
             var assemblerService = new AssemblerService(options.ToolchainPath, Log.Logger);
             var symbolParser = new SymbolTableParser(Log.Logger);
+            var sectionParser = new SectionParser(Log.Logger);
             var sectionExtractor = new SectionExtractor(Log.Logger);
             var patchApplicator = new PatchApplicator(Log.Logger);
             var validationService = new ValidationService(Log.Logger);
@@ -95,6 +96,11 @@ class Program
             Log.Information("Found {SymbolCount} symbols", symbols.Count);
 
             var patches = symbolParser.IdentifyPatchSections(symbols);
+
+            var sectionHeaders = await assemblerService.GetSectionHeadersAsync(elfFile);
+            patches.Add(sectionParser.GetImplementation(sectionHeaders));
+            patches.Add(sectionParser.GetData(sectionHeaders));
+
             if (patches.Count == 0)
             {
                 Log.Error("No patch sections found in assembled ELF file");
@@ -108,23 +114,11 @@ class Program
             
             foreach (var patch in patches)
             {
-                // First determine where this patch should be applied
-                patch.TargetAddress = sectionExtractor.DetermineTargetAddress(patch, symbols);
-                
-                // Find the actual end of the data by looking for the next symbol after the target
-                var symbolsAfterTarget = symbols
-                    .Where(s => s.Address > patch.TargetAddress)
-                    .OrderBy(s => s.Address)
-                    .ToList();
-                
-                if (!symbolsAfterTarget.Any())
+                // The whole-section CODE patch already has its target address from the section header
+                if (!string.IsNullOrEmpty(patch.StartLabel))
                 {
-                    Log.Error("Cannot determine end address for patch {PatchName} - no symbols found after target address 0x{Target:X8}", 
-                        patch.Name, patch.TargetAddress);
-                    throw new InvalidOperationException($"Cannot determine end address for patch {patch.Name}. No symbols found after target address 0x{patch.TargetAddress:X8}");
+                    patch.TargetAddress = sectionExtractor.DetermineTargetAddress(patch, symbols);
                 }
-                
-                var targetEndAddress = symbolsAfterTarget.First().Address;
                 
                 // Extract the actual data from the source location (where assembler put it)
                 patch.Data = sectionExtractor.ExtractSectionData(sectionDumps, patch.StartAddress, patch.EndAddress);

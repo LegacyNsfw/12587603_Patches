@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 using FirmwarePatcher.Models;
 using Serilog;
 
@@ -95,6 +96,23 @@ public class AssemblerService
         }
         
         return ParseSectionDump(result.StandardOutput);
+    }
+
+    public async Task<List<SectionHeaderInfo>> GetSectionHeadersAsync(string elfFile)
+    {
+        var objdumpPath = GetToolPath("m68k-elf-objdump");
+        var arguments = $"-h \"{elfFile}\"";
+        
+        _logger.Debug("Getting section headers: {Tool} {Arguments}", objdumpPath, arguments);
+        
+        var result = await RunProcessAsync(objdumpPath, arguments);
+        
+        if (result.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"Failed to get section headers: {result.StandardError}");
+        }
+        
+        return ParseSectionHeaders(result.StandardOutput);
     }
 
     public async Task<string> GetDisassemblyAsync(string elfFile)
@@ -199,6 +217,38 @@ public class AssemblerService
             "U" => SymbolType.Undefined,
             _ => SymbolType.Unknown
         };
+    }
+
+    private List<SectionHeaderInfo> ParseSectionHeaders(string objdumpOutput)
+    {
+        var headers = new List<SectionHeaderInfo>();
+        var lines = objdumpOutput.Split('\n');
+
+        // Section header lines look like:
+        //   2 .patch_code   00000182  00090000  00090000  00004000  2**2
+        var regex = new Regex(@"^\s*\d+\s+(\S+)\s+([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+[0-9a-fA-F]+\s+[0-9a-fA-F]+");
+
+        foreach (var line in lines)
+        {
+            var match = regex.Match(line);
+            if (!match.Success)
+                continue;
+
+            if (!uint.TryParse(match.Groups[2].Value, System.Globalization.NumberStyles.HexNumber, null, out var size))
+                continue;
+
+            if (!uint.TryParse(match.Groups[3].Value, System.Globalization.NumberStyles.HexNumber, null, out var address))
+                continue;
+
+            headers.Add(new SectionHeaderInfo
+            {
+                Name = match.Groups[1].Value,
+                Address = address,
+                Size = size
+            });
+        }
+
+        return headers;
     }
 
     private Dictionary<string, string> ParseSectionDump(string objdumpOutput)

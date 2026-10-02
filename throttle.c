@@ -5,7 +5,7 @@
 int comparePrimaryAndRedundantThrottlePositionsInvoked = 0;
 
 #ifdef __m68k__
-void (*ComparePrimaryAndRedundantThrottlePositions)(void) = (void (*)(void)) 0x20A3A;
+void (*const ComparePrimaryAndRedundantThrottlePositions)(void) = (void (*)(void)) 0x20A3A;
 #else
 void ComparePrimaryAndRedundantThrottlePositions(void) { comparePrimaryAndRedundantThrottlePositionsInvoked = 1; }
 #endif
@@ -22,8 +22,8 @@ void setTargetRpm(
 // This is factored out to enable it to be called from two places.
 static inline __attribute__((always_inline))
 void lookupThrottleBladeAngle(
-    unsigned short *pRpmToThrottleBladeAngleTable,
-    unsigned short *pInputRpm,
+    unsigned short const *pRpmToThrottleBladeAngleTable,
+    unsigned short const *pInputRpm,
     unsigned short *pOutputThrottleBladeAngle)
 {
 #ifdef __m68k__
@@ -86,7 +86,7 @@ void throttlePatch(void)
         *pMaxThrottle = PERCENTAGE(100);
         if (*pCurrentGear >= 0 && *pCurrentGear < 6)
         {
-            unsigned short *pThrottleLimitTable = PerGearThrottleLimit[*pCurrentGear];
+            unsigned short const *pThrottleLimitTable = PerGearThrottleLimit[*pCurrentGear];
             lookupThrottleBladeAngle(pThrottleLimitTable, pEngineSpeed, pMaxThrottle);
         }
 

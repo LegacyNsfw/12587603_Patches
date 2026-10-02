@@ -10,7 +10,7 @@
 // so that it never happens unexpectedly. This value specifies exactly what 
 // "slightly" means.
 
-unsigned short MinimumThrottlePedalPosition
+unsigned short const MinimumThrottlePedalPosition
     __attribute__((section(".data.tables")))
     = (unsigned short)(5 * 51.2);
 
@@ -24,7 +24,7 @@ unsigned short MinimumThrottlePedalPosition
 //
 // We'll just command a fixed throttle blade angle until the rest of the logic
 // is validated. Then we'll replace this with a properly calculated value.
-unsigned short FixedThrottleBladeAngle
+unsigned short const FixedThrottleBladeAngle
     __attribute__((section(".data.tables")))
     = (unsigned short)(20 * 51.2);
 
@@ -35,7 +35,7 @@ unsigned short FixedThrottleBladeAngle
 // Data type: 16 bit unsigned
 //
 // Cross-reference: Table B2702 / ETC Max Throttle Position Vs. RPM
-unsigned short MaximumThrottleBladeAngle
+unsigned short const MaximumThrottleBladeAngle
     __attribute__((section(".data.tables")))
     = (unsigned short)(PERCENTAGE(97));
 
@@ -62,7 +62,7 @@ unsigned short MaximumThrottleBladeAngle
 // RPM = (gear_specific_ratio * vehicle speed) >> 12
 ///////////////////////////////////////////////////////////////////////////////
 #define RATIO(x) ((unsigned short)(x * 4096))
-unsigned short SpeedToRpmFactorArray[]
+unsigned short const SpeedToRpmFactorArray[]
     __attribute__((section(".data.tables"))) = {
 
         RATIO(10),   // 1st gear
@@ -81,7 +81,7 @@ unsigned short SpeedToRpmFactorArray[]
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned short RpmToThrottleBladeAngle[]
+unsigned short const RpmToThrottleBladeAngle[]
     __attribute__((section(".data.tables"))) = {
         PERCENTAGE(10),   // 0
         PERCENTAGE(10),   // 500
@@ -101,7 +101,7 @@ unsigned short RpmToThrottleBladeAngle[]
         PERCENTAGE(32),   // 8000
     };
 
-unsigned short PerGearThrottleLimit[6][16]
+unsigned short const PerGearThrottleLimit[6][16]
     __attribute__((section(".data.tables"))) = {
         // First gear
         {

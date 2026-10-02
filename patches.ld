@@ -26,14 +26,12 @@ SECTIONS
     .patch_code : {
         *(.code.implementation)
         KEEP(*(.code.implementation*))
-        *(.text)
     } >CODE
     
     /* Patch data section */
     .patch_data : {
         *(.data.tables)
         KEEP(*(.data.tables*))
-        *(.data)
     } >DATA
     
     /* Discard unwanted sections */

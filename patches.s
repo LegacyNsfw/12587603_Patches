@@ -41,7 +41,6 @@ PATCH_HOOK_THROTTLE_END:
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 | Base address for patch code
         .section .code.implementation
-PATCH_CODE_START:
 
 LowMafEoitPatch:
         | Use a modified EOIT table when MAF is below a certain threshold
@@ -59,13 +58,10 @@ LowMafEoitPatch:
 use_low_maf_table:
         tblu.w  (LOW_MAF_EOIT_TABLE).l,%d0
         rts
-PATCH_CODE_END:
-        nop
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 | Base address for patch data
         .section .data.tables
-PATCH_DATA_START:
 LOW_MAF_THRESHOLD_VALUE: 
 | Constant value for low MAF threshold (0x1900 = 50 g/s)
         .word   0x1900
@@ -86,5 +82,4 @@ LOW_MAF_EOIT_TABLE:
         .word   0x58d | 116
         .word   0x58d | 128
         .word   0x58d | 140
-PATCH_DATA_END:
         .word   0x1234
