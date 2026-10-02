@@ -1,15 +1,18 @@
-#ifdef DEFINE_RAM_ADDRESSES
-    #ifdef __m68k__
-        #define UINT_AT_ADDRESS(name, addr) unsigned short *name = (unsigned short *)(addr);
-        #define BYTE_AT_ADDRESS(name, addr) unsigned char *name = (unsigned char *)(addr);
-    #else
-        #define UINT_AT_ADDRESS(name, addr) unsigned short ram_##addr; unsigned short *name = &ram_##addr;
-        #define BYTE_AT_ADDRESS(name, addr) unsigned char ram_##addr; unsigned char *name = &ram_##addr;
-    #endif
+#ifdef __m68k__
+    // For m68k code, we use static const pointers so that the compiler will embed the RAM addresses directly into the code.
+    #define UINT_AT_ADDRESS(name, addr) static unsigned short * const name = (unsigned short *)(addr);
+    #define BYTE_AT_ADDRESS(name, addr) static unsigned char * const name = (unsigned char *)(addr);
 #else
-        #define UINT_AT_ADDRESS(name, addr) extern unsigned short *name;
-        #define BYTE_AT_ADDRESS(name, addr) extern unsigned char *name;
+    // For x86/amd64 code, we need to define storage (once) and extern pointers to storage (for all other files).
+    #ifdef DEFINE_RAM_ADDRESSES
+        #define UINT_AT_ADDRESS(name, addr) unsigned short ram_##addr; unsigned short * const name = &ram_##addr;
+        #define BYTE_AT_ADDRESS(name, addr) unsigned char ram_##addr; unsigned char * const name = &ram_##addr;
+    #else
+        #define UINT_AT_ADDRESS(name, addr) extern unsigned short * const name;
+        #define BYTE_AT_ADDRESS(name, addr) extern unsigned char * const name;
+    #endif
 #endif
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Accelerator pedal position.
