@@ -67,10 +67,10 @@ unsigned short const SpeedToRpmFactorArray[]
 
         RATIO(10),   // 1st gear
         RATIO(6.4),  // 2nd gear
-        RATIO(5.65), // 3rd gear
+        RATIO(4.65), // 3rd gear
         RATIO(3.4),  // 4th gear
-        RATIO(2.4),  // 5th gear
-        RATIO(1.8)   // 6th gear - hey wait you can't downshift into this gear
+        RATIO(2.56),  // 5th gear
+        RATIO(1.78)   // 6th gear - hey wait you can't downshift into this gear
     };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -81,10 +81,11 @@ unsigned short const SpeedToRpmFactorArray[]
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned short const RpmToThrottleBladeAngle[]
+unsigned short const RpmToThrottleBladeAngle[17]
     __attribute__((section(".data.tables"))) = {
         PERCENTAGE(10),   // 0
         PERCENTAGE(10),   // 500
+        PERCENTAGE(10),   // 1000
         PERCENTAGE(12),   // 1500
         PERCENTAGE(13),   // 2000
         PERCENTAGE(14),   // 2500
@@ -101,12 +102,13 @@ unsigned short const RpmToThrottleBladeAngle[]
         PERCENTAGE(32),   // 8000
     };
 
-unsigned short const PerGearThrottleLimit[6][16]
+unsigned short const PerGearThrottleLimit[6][17]
     __attribute__((section(".data.tables"))) = {
         // First gear
         {
             PERCENTAGE(50),   // 0
             PERCENTAGE(50),   // 500
+            PERCENTAGE(50),   // 1000
             PERCENTAGE(50),   // 1500
             PERCENTAGE(50),   // 2000
             PERCENTAGE(50),   // 2500
@@ -126,6 +128,7 @@ unsigned short const PerGearThrottleLimit[6][16]
         {
             PERCENTAGE(75),   // 0
             PERCENTAGE(75),   // 500
+            PERCENTAGE(75),   // 1000
             PERCENTAGE(75),   // 1500
             PERCENTAGE(75),   // 2000
             PERCENTAGE(75),   // 2500
@@ -145,6 +148,7 @@ unsigned short const PerGearThrottleLimit[6][16]
         {
             PERCENTAGE(100),   // 0
             PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1000
             PERCENTAGE(100),   // 1500
             PERCENTAGE(100),   // 2000
             PERCENTAGE(100),   // 2500
@@ -164,6 +168,7 @@ unsigned short const PerGearThrottleLimit[6][16]
         {
             PERCENTAGE(100),   // 0
             PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1000
             PERCENTAGE(100),   // 1500
             PERCENTAGE(100),   // 2000
             PERCENTAGE(100),   // 2500
@@ -183,6 +188,7 @@ unsigned short const PerGearThrottleLimit[6][16]
         {
             PERCENTAGE(100),   // 0
             PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1000
             PERCENTAGE(100),   // 1500
             PERCENTAGE(100),   // 2000
             PERCENTAGE(100),   // 2500
@@ -202,6 +208,7 @@ unsigned short const PerGearThrottleLimit[6][16]
         {
             PERCENTAGE(100),   // 0
             PERCENTAGE(100),   // 500
+            PERCENTAGE(100),   // 1000
             PERCENTAGE(100),   // 1500
             PERCENTAGE(100),   // 2000
             PERCENTAGE(100),   // 2500

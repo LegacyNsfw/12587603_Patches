@@ -1,0 +1,216 @@
+<!-- Written 10/02/2026 15:17:05 -->
+<XDFFORMAT version="1.80">
+  <XDFHEADER>
+    <flags>0x1</flags>
+    <fileversion>Ver 1</fileversion>
+    <deftitle>12587603 complete XDF</deftitle>
+    <description>XDF for NSFW patches for Operating System 12587603 for P59 PCMs.&#013;&#010;&#013;&#010;Use only with patched 12587603 bins.</description>
+    <author>PERSINGC</author>
+    <BASEOFFSET offset="0" subtract="0" />
+    <DEFAULTS datasizeinbits="16" sigdigits="1" outputtype="2" signed="0" lsbfirst="0" float="0" />
+    <REGION type="0xFFFFFFFF" startaddress="0x0" size="0xFFFFF" regioncolor="0x0" regionflags="0x0" name="Binary File" desc="This region describes the bin file edited by this XDF" />
+    <CATEGORY index="0x0" name="Throttle" />
+    <CATEGORY index="0x1" name="Rev Matching" />
+    <CATEGORY index="0x2" name="Traction Control" />
+  </XDFHEADER>
+  <XDFTABLE uniqueid="0x4702" flags="0x30">
+    <title>Throttle Position For Target RPM</title>
+    <description>The throttle position that will be commanded to achieve the given RPM</description>
+    <CATEGORYMEM index="0" category="1" />
+    <CATEGORYMEM index="1" category="2" />
+    <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>%Torque</units>
+      <indexcount>1</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="0" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>RPM</units>
+      <indexcount>17</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="0" />
+      <LABEL index="1" value="500" />
+      <LABEL index="2" value="1000" />
+      <LABEL index="3" value="1500" />
+      <LABEL index="4" value="2000" />
+      <LABEL index="5" value="2500" />
+      <LABEL index="6" value="3000" />
+      <LABEL index="7" value="3500" />
+      <LABEL index="8" value="4000" />
+      <LABEL index="9" value="4500" />
+      <LABEL index="10" value="5000" />
+      <LABEL index="11" value="5500" />
+      <LABEL index="12" value="6000" />
+      <LABEL index="13" value="6500" />
+      <LABEL index="14" value="7000" />
+      <LABEL index="15" value="7500" />
+      <LABEL index="16" value="8000" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="z">
+      <EMBEDDEDDATA mmedtypeflags="0x04" mmedaddress="0xA00F0" mmedelementsizebits="16" mmedrowcount="17" mmedmajorstridebits="0" mmedminorstridebits="0" />
+      <decimalpl>1</decimalpl>
+      <min>0.000000</min>
+      <max>100.000000</max>
+      <outputtype>1</outputtype>
+      <MATH equation="X*.01953125">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+  </XDFTABLE>
+  <XDFTABLE uniqueid="0x4702" flags="0x30">
+    <title>Gear Ratios</title>
+    <description>The PCM will calculate the target RPM based on the speed sensor and this multiplier. These multipliers can be derived from the Gear Ratio Thresholds table in the Manual Transmission calibration section.</description>
+    <CATEGORYMEM index="0" category="1" />
+    <CATEGORYMEM index="1" category="2" />
+    <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>Ratio Threshold</units>
+      <indexcount>1</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="Lower" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>RPM</units>
+      <indexcount>6</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="1st" />
+      <LABEL index="1" value="2nd" />
+      <LABEL index="2" value="3rd" />
+      <LABEL index="3" value="4th" />
+      <LABEL index="4" value="5th" />
+      <LABEL index="5" value="6th" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="z">
+      <EMBEDDEDDATA mmedaddress="0xA0112" mmedelementsizebits="16" mmedrowcount="6" mmedmajorstridebits="0" mmedminorstridebits="0" />
+      <units>RPM/MPH</units>
+      <decimalpl>2</decimalpl>
+      <min>0.000000</min>
+      <max>16.000000</max>
+      <outputtype>1</outputtype>
+      <MATH equation="X/4096">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+  </XDFTABLE>
+  <XDFCONSTANT uniqueid="0x6BEA">
+    <title>Test Throttle Blade Angle</title>
+    <description>For test use only - remove before release.</description>
+    <CATEGORYMEM index="0" category="1" />
+    <CATEGORYMEM index="1" category="2" />
+    <EMBEDDEDDATA mmedaddress="0xA0120" mmedelementsizebits="16" mmedmajorstridebits="0" mmedminorstridebits="0" />
+    <units>%</units>
+    <datatype>0</datatype>
+    <unittype>0</unittype>
+    <DALINK index="0" />
+    <MATH equation="X*.01953">
+      <VAR id="X" />
+    </MATH>
+  </XDFCONSTANT>
+
+  <XDFTABLE uniqueid="0x4702" flags="0x30">
+    <title>Max Throttle By RPM and Gear</title>
+    <description>The maximum throttle position that will be allowed at the given RPM and in the given gear</description>
+    <CATEGORYMEM index="0" category="1" />
+    <CATEGORYMEM index="1" category="3" />
+    <XDFAXIS id="x" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>%Throttle</units>
+      <indexcount>6</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="1st" />
+      <LABEL index="1" value="2nd" />
+      <LABEL index="2" value="3rd" />
+      <LABEL index="3" value="4th" />
+      <LABEL index="4" value="5th" />
+      <LABEL index="5" value="6th" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="y" uniqueid="0x0">
+      <EMBEDDEDDATA mmedelementsizebits="16" mmedmajorstridebits="-32" mmedminorstridebits="0" />
+      <units>RPM</units>
+      <indexcount>17</indexcount>
+      <outputtype>4</outputtype>
+      <datatype>0</datatype>
+      <unittype>0</unittype>
+      <DALINK index="0" />
+      <LABEL index="0" value="0" />
+      <LABEL index="1" value="500" />
+      <LABEL index="2" value="1000" />
+      <LABEL index="3" value="1500" />
+      <LABEL index="4" value="2000" />
+      <LABEL index="5" value="2500" />
+      <LABEL index="6" value="3000" />
+      <LABEL index="7" value="3500" />
+      <LABEL index="8" value="4000" />
+      <LABEL index="9" value="4500" />
+      <LABEL index="10" value="5000" />
+      <LABEL index="11" value="5500" />
+      <LABEL index="12" value="6000" />
+      <LABEL index="13" value="6500" />
+      <LABEL index="14" value="7000" />
+      <LABEL index="15" value="7500" />
+      <LABEL index="16" value="8000" />
+      <MATH equation="X">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+    <XDFAXIS id="z">
+      <EMBEDDEDDATA mmedtypeflags="0x04" mmedaddress="0xA0024" mmedelementsizebits="16" mmedrowcount="17" mmedcolcount="6" mmedmajorstridebits="0" mmedminorstridebits="0" />
+      <decimalpl>1</decimalpl>
+      <min>0.000000</min>
+      <max>100.000000</max>
+      <outputtype>1</outputtype>
+      <MATH equation="X*.01953125">
+        <VAR id="X" />
+      </MATH>
+    </XDFAXIS>
+  </XDFTABLE>
+
+  <XDFCONSTANT uniqueid="0x6BEA">
+    <title>Maximum Throttle Blade Angle</title>
+    <description>Maximum throttle position that the accelerator pedal can command (not used during rev matching).</description>
+    <CATEGORYMEM index="0" category="1" />
+    <CATEGORYMEM index="1" category="3" />
+    <EMBEDDEDDATA mmedaddress="0xA011E" mmedelementsizebits="16" mmedmajorstridebits="0" mmedminorstridebits="0" />
+    <units>%</units>
+    <datatype>0</datatype>
+    <unittype>0</unittype>
+    <DALINK index="0" />
+    <MATH equation="X*.01953">
+      <VAR id="X" />
+    </MATH>
+  </XDFCONSTANT>
+
+</XDFFORMAT>
